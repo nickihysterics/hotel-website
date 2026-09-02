@@ -1,0 +1,68 @@
+services:
+  # PHP-приложение доступно только через reverse proxy.
+  web:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+    restart: unless-stopped
+    working_dir: /var/www/app
+    volumes:
+      - ./:/var/www/app
+    environment:
+      DB_HOST: ${DB_HOST:-db}
+      DB_NAME: ${DB_NAME:-hotel}
+      DB_USER: ${DB_USER:-hotel}
+      DB_PASS: ${DB_PASS:-hotel}
+      DB_PORT: ${DB_PORT:-3306}
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASS: ${ADMIN_PASS:-admin123}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  nginx:
+    build: ./deploy/nginx
+    restart: unless-stopped
+    ports:
+      - "${HOTEL_HTTP_PORT:-80}:80"
+      - "${HOTEL_HTTPS_PORT:-443}:443"
+    depends_on:
+      - web
+
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-hotel}
+      MYSQL_USER: ${DB_USER:-hotel}
+      MYSQL_PASSWORD: ${DB_PASS:-hotel}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS:-root}
+    volumes:
+      # init.sql выполняется MySQL только при создании пустого volume.
+      - db-data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  phpmyadmin:
+    # Сервис предназначен для локальной диагностики и не публикуется в production.
+    image: phpmyadmin:5
+    restart: unless-stopped
+    ports:
+      - "${HOTEL_PMA_PORT:-8081}:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 0
+    volumes:
+      - ./deploy/phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:

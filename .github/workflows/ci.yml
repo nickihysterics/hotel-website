@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  php:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Проверить Docker Compose
+        run: docker compose config --quiet
+      - name: Собрать PHP-образ
+        run: docker compose build web
+      - name: Проверить Composer
+        run: docker compose run --rm --no-deps web composer validate --strict
+      - name: Установить зависимости
+        run: docker compose run --rm --no-deps web composer install --no-interaction --prefer-dist
+      - name: Запустить lint, PHPStan и code style
+        run: docker compose run --rm --no-deps web composer check
+
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Подготовить локальное окружение
+        run: cp .env.example .env
+      - name: Запустить полный стек
+        run: docker compose up -d --build
+      - name: Проверить публичный сайт и авторизацию
+        run: BASE_URL=https://localhost ./scripts/smoke.sh
+      - name: Остановить стенд
+        if: always()
+        run: docker compose down -v

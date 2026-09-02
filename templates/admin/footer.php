@@ -1,0 +1,4 @@
+    </main>
+    <script src="/js/product.js"></script>
+  </body>
+</html>

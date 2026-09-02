@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+.DS_Store
+db-data/
+vendor/
+composer.phar
+storage/logs/
+.phpunit.cache/
+.phpstan.cache/
+coverage/
+.php-cs-fixer.cache
+.php-cs-fixer.cache.tmp
+.phpunit.result.cache
+.idea/
+.vscode/
