@@ -6,11 +6,17 @@
 
 ## [Unreleased]
 
+## [1.1.0] — 2026-09-06
+
+### Добавлено
+
+- защищённый CSRF однокнопочный вход для демонстрационного гостя.
+
 ### Изменено
 
 - унифицирована кириллическая типографика и отображение числовых значений;
 - усилен контраст верхней навигации и текста поверх фотографий номеров;
-- добавлен защищённый CSRF однокнопочный вход для демонстрационного гостя.
+- обновлены скриншоты публичной части, личного кабинета и панели администратора.
 
 ## [1.0.0] — 2026-09-02
 
@@ -35,5 +41,6 @@
 - хеширование паролей, CSRF-защита, безопасные cookie и HTTP security headers;
 - подготовленные выражения PDO и разграничение доступа по ролям.
 
-[Unreleased]: https://github.com/nickihysterics/hotel-website/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/nickihysterics/hotel-website/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/nickihysterics/hotel-website/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/nickihysterics/hotel-website/releases/tag/v1.0.0
