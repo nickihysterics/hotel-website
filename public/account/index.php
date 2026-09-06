@@ -67,7 +67,7 @@ require __DIR__ . '/../../templates/site/header.php';
             <span><strong>Номер</strong><?= e((string) ($booking['room_number'] ?? 'назначит отель')) ?></span>
           </div>
           <div class="booking-total-row">
-            <div><small>Стоимость</small><strong><?= e(money($booking['total'])) ?></strong><?php if ($balance > 0): ?><span>К оплате <?= e(money($balance)) ?></span><?php else: ?><span class="paid-mark">Оплачено</span><?php endif; ?></div>
+            <div class="booking-price"><small>Стоимость</small><strong><?= e(money($booking['total'])) ?></strong><?php if ($balance > 0): ?><span>К оплате <?= e(money($balance)) ?></span><?php else: ?><span class="paid-mark">Оплачено</span><?php endif; ?></div>
             <div class="button-group">
               <a class="product-button small secondary" href="/account/booking.php?id=<?= e((string) $booking['id']) ?>">Подробнее</a>
               <?php if ($booking['status'] === 'checked_out'): ?><a class="product-button small secondary" href="/account/review.php?id=<?= e((string) $booking['id']) ?>">Отзыв</a><?php endif; ?>

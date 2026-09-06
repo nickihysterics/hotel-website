@@ -16,6 +16,9 @@ services:
       DB_PORT: ${DB_PORT:-3306}
       ADMIN_USER: ${ADMIN_USER:-admin}
       ADMIN_PASS: ${ADMIN_PASS:-admin123}
+      # Быстрый вход предназначен только для локального демонстрационного стенда.
+      DEMO_LOGIN_ENABLED: ${DEMO_LOGIN_ENABLED:-1}
+      DEMO_GUEST_EMAIL: ${DEMO_GUEST_EMAIL:-guest@hotel.localhost}
     depends_on:
       db:
         condition: service_healthy

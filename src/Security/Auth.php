@@ -75,6 +75,31 @@ final class Auth
         return $this->attempt($identifier, $password, ['guest']);
     }
 
+    /**
+     * Создаёт гостевую сессию для демонстрационного аккаунта без передачи пароля в браузер.
+     * Вызывать метод можно только после проверки DEMO_LOGIN_ENABLED на уровне endpoint.
+     */
+    public function loginDemoGuest(string $email): bool
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT id, client_id, associate_id, login, email, password_hash, role, active'
+            . " FROM users WHERE email = :email AND role = 'guest' LIMIT 1"
+        );
+        $stmt->execute(['email' => $email]);
+        $user = $stmt->fetch();
+
+        if (!$user || (int) $user['active'] !== 1 || $user['client_id'] === null) {
+            return false;
+        }
+
+        $this->loginUser($user);
+        $this->pdo->prepare('UPDATE users SET last_login_at = NOW() WHERE id = :id')
+            ->execute(['id' => $user['id']]);
+        audit_log($this->pdo, 'auth.demo_login', 'user', (string) $user['id'], ['role' => 'guest']);
+
+        return true;
+    }
+
     public function check(): bool
     {
         return $this->user() !== null;

@@ -58,4 +58,13 @@ code=$(curl -k -sS -b "$work_dir/guest.cookies" -o "$work_dir/account.html" -w '
 code=$(curl -k -sS -b "$work_dir/guest.cookies" -o "$work_dir/booking.html" -w '%{http_code}' "$base_url/account/booking.php?id=1")
 [ "$code" = '200' ] || { echo "guest booking: HTTP $code"; exit 1; }
 
+# Отдельно проверяем однокнопочный вход, который не передаёт demo-пароль в браузер.
+curl -k -sS -c "$work_dir/demo.cookies" "$base_url/login.php" -o "$work_dir/demo-form.html"
+token=$(sed -n 's/.*name="_token" value="\([^"]*\)".*/\1/p' "$work_dir/demo-form.html" | head -1)
+curl -k -sS -b "$work_dir/demo.cookies" -c "$work_dir/demo.cookies" -X POST \
+  --data-urlencode "_token=$token" --data-urlencode "action=demo-login" \
+  "$base_url/login.php" -o /dev/null
+code=$(curl -k -sS -b "$work_dir/demo.cookies" -o "$work_dir/demo-account.html" -w '%{http_code}' "$base_url/account/")
+[ "$code" = '200' ] || { echo "guest demo login: HTTP $code"; exit 1; }
+
 echo 'Authenticated smoke test: OK'
